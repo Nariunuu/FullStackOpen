@@ -1,6 +1,7 @@
 const express = require('express')
 const logger = require('./logger')
 const cors = require('cors')
+const Person = require('./models/person')
 
 const app = express()
 app.use(express.json())
@@ -8,53 +9,46 @@ app.use(logger)
 app.use(cors({ origin: process.env.CLIENT_URL }))
 app.use(express.static('dist'))
 
-let persons = [
-  { id: '1', name: 'Arto Hellas', number: '040-123456' },
-  { id: '2', name: 'Ada Lovelace', number: '39-44-5323523' },
-  { id: '3', name: 'Dan Abramov', number: '12-43-234345' },
-  { id: '4', name: 'Mary Poppendieck', number: '39-23-6423122' }
-]
-
-app.get('/api/persons', (req, res) => {
+app.get('/api/persons', async (req, res) => {
+  const persons = await Person.find({})
   res.json(persons)
 })
 
-app.get('/info', (req, res) => {
+app.get('/info', async (req, res) => {
+  const count = await Person.countDocuments({})
   res.send(
-    `<p>Phonebook has info for ${persons.length} people</p>
+    `<p>Phonebook has info for ${count} people</p>
      <p>${new Date()}</p>`
   )
 })
 
-app.get('/api/persons/:id', (req, res) => {
-  const person = persons.find(p => p.id === req.params.id)
+app.get('/api/persons/:id', async (req, res) => {
+  const person = await Person.findById(req.params.id)
   if (!person) {
     return res.status(404).end()
   }
   res.json(person)
 })
 
-app.delete('/api/persons/:id', (req, res) => {
-  persons = persons.filter(p => p.id !== req.params.id)
+app.delete('/api/persons/:id', async (req, res) => {
+  await Person.findByIdAndDelete(req.params.id)
   res.status(204).end()
 })
 
-const generateId = () => String(Math.floor(Math.random() * 1_000_000))
-
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', async (req, res) => {
   const { name, number } = req.body
 
   if (!name || !number) {
     return res.status(400).json({ error: 'name or number is missing' })
   }
 
-  if (persons.some(p => p.name === name)) {
+  const existing = await Person.findOne({ name })
+  if (existing) {
     return res.status(400).json({ error: 'name must be unique' })
   }
 
-  const person = { id: generateId(), name, number }
-  persons = persons.concat(person)
-  res.status(201).json(person)
+  const saved = await new Person({ name, number }).save()
+  res.status(201).json(saved)
 })
 
 const PORT = process.env.PORT || 3001
