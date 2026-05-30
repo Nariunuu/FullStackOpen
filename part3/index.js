@@ -40,7 +40,7 @@ app.put('/api/persons/:id', async (req, res) => {
   const updated = await Person.findByIdAndUpdate(
     req.params.id,
     { number },
-    { new: true }
+    { new: true, runValidators: true, context: 'query' }
   )
   if (!updated) {
     return res.status(404).end()
@@ -50,10 +50,6 @@ app.put('/api/persons/:id', async (req, res) => {
 
 app.post('/api/persons', async (req, res) => {
   const { name, number } = req.body
-
-  if (!name || !number) {
-    return res.status(400).json({ error: 'name or number is missing' })
-  }
 
   const existing = await Person.findOne({ name })
   if (existing) {
@@ -67,6 +63,9 @@ app.post('/api/persons', async (req, res) => {
 const errorHandler = (error, req, res, next) => {
   if (error.name === 'CastError') {
     return res.status(400).json({ error: 'malformatted id' })
+  }
+  if (error.name === 'ValidationError') {
+    return res.status(400).json({ error: error.message })
   }
   next(error)
 }

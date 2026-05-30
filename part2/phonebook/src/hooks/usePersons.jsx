@@ -37,7 +37,8 @@ const usePersons = () => {
       setPersons(persons.concat(response.data));
       setNotification({ message: `${person.name} added`, status: 'success' });
     } catch (error) {
-      setNotification({ message: `Failed to add ${person.name}: ${error.message}`, status: 'error' });
+      const message = error.response?.data?.error || error.message;
+      setNotification({ message: `Failed to add ${person.name}: ${message}`, status: 'error' });
     }
   };
 
@@ -47,7 +48,8 @@ const usePersons = () => {
       setPersons(persons.filter(({ id: personId }) => personId !== id));
       setNotification({ message: `Person deleted`, status: 'success' });
     } catch (error) {
-      setNotification({ message: `Failed to delete person: ${error.message}`, status: 'error' });
+      const message = error.response?.data?.error || error.message;
+      setNotification({ message: `Failed to delete person: ${message}`, status: 'error' });
     }
   };
 
@@ -57,8 +59,8 @@ const usePersons = () => {
       setPersons(persons.map((p) => p.id === response.data.id ? response.data : p));
       setNotification({ message: `Person updated`, status: 'success' });
     } catch (error) {
-      setNotification({ message: `Person ${person.name} might already be deleted: ${error.message}`, status: 'error' });
-      setPersons(persons.filter(({ id: personId }) => personId !== person.id));
+      const message = error.response?.data?.error || error.message;
+      setNotification({ message: `Failed to update ${person.name}: ${message}`, status: 'error' });
     }
   };
 
