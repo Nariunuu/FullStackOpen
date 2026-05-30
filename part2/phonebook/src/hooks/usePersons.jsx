@@ -2,11 +2,13 @@ import axios from "axios";
 import { useEffect } from "react";
 import { useState } from "react";
 
+const baseUrl = import.meta.env.VITE_SERVER_URL;
+
 const usePersons = () => {
   const [persons, setPersons] = useState([]);
   const [notification, setNotification] = useState(null);
   useEffect(() => {
-    axios.get("http://localhost:3005/persons").then((response) => {
+    axios.get(baseUrl).then((response) => {
       setPersons(response.data);
     });
   }, []);
@@ -31,7 +33,7 @@ const usePersons = () => {
       return;
     }
     try {
-      axios.post("http://localhost:3005/persons", person).then((response) => {
+      axios.post(baseUrl, person).then((response) => {
         setPersons(persons.concat(response.data));
       });
       setNotification({ message: `${person.name} added`, status: 'success' });
@@ -42,7 +44,7 @@ const usePersons = () => {
 
   const deletePerson = async (id) => {
     try {
-      axios.delete(`http://localhost:3005/persons/${id}`).then((response) => {
+      axios.delete(`${baseUrl}/${id}`).then((response) => {
         setPersons(persons.filter(({ id: personId }) => personId !== response.data.id));
       });
       setNotification({ message: `Person deleted`, status: 'success' });
@@ -53,7 +55,7 @@ const usePersons = () => {
 
   const updatePerson = async (person) => {
     try {
-      const response = await axios.put(`http://localhost:3005/persons/${person.id}`, person);
+      const response = await axios.put(`${baseUrl}/${person.id}`, person);
       setPersons(persons.map((p) => p.id === response.data.id ? response.data : p));
       setNotification({ message: `Person updated`, status: 'success' });
     } catch (error) {
