@@ -1,8 +1,9 @@
+import Part from './Part'
 const Content = ({ parts }) => {
   return (
     <div>
       {parts.map((part) => (
-        <p key={part.id}>{part.name} {part.exercises}</p>
+        <Part key={part.id} part={part} />
       ))}
     </div>
   )
