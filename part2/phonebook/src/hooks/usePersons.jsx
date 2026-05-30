@@ -33,9 +33,8 @@ const usePersons = () => {
       return;
     }
     try {
-      axios.post(baseUrl, person).then((response) => {
-        setPersons(persons.concat(response.data));
-      });
+      const response = await axios.post(baseUrl, person);
+      setPersons(persons.concat(response.data));
       setNotification({ message: `${person.name} added`, status: 'success' });
     } catch (error) {
       setNotification({ message: `Failed to add ${person.name}: ${error.message}`, status: 'error' });
@@ -44,9 +43,8 @@ const usePersons = () => {
 
   const deletePerson = async (id) => {
     try {
-      axios.delete(`${baseUrl}/${id}`).then((response) => {
-        setPersons(persons.filter(({ id: personId }) => personId !== response.data.id));
-      });
+      await axios.delete(`${baseUrl}/${id}`);
+      setPersons(persons.filter(({ id: personId }) => personId !== id));
       setNotification({ message: `Person deleted`, status: 'success' });
     } catch (error) {
       setNotification({ message: `Failed to delete person: ${error.message}`, status: 'error' });

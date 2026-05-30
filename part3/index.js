@@ -35,6 +35,19 @@ app.delete('/api/persons/:id', async (req, res) => {
   res.status(204).end()
 })
 
+app.put('/api/persons/:id', async (req, res) => {
+  const { number } = req.body
+  const updated = await Person.findByIdAndUpdate(
+    req.params.id,
+    { number },
+    { new: true }
+  )
+  if (!updated) {
+    return res.status(404).end()
+  }
+  res.json(updated)
+})
+
 app.post('/api/persons', async (req, res) => {
   const { name, number } = req.body
 
@@ -50,6 +63,14 @@ app.post('/api/persons', async (req, res) => {
   const saved = await new Person({ name, number }).save()
   res.status(201).json(saved)
 })
+
+const errorHandler = (error, req, res, next) => {
+  if (error.name === 'CastError') {
+    return res.status(400).json({ error: 'malformatted id' })
+  }
+  next(error)
+}
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
