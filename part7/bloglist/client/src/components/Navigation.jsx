@@ -1,0 +1,49 @@
+import { useNavigate, Link as RouterLink } from 'react-router-dom'
+import { AppBar, Toolbar, Button, Box, Typography } from '@mui/material'
+import { useUser } from '../contexts/UserContext'
+
+const Navigation = () => {
+  const { user, logout } = useUser()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
+
+  return (
+    <AppBar position="static" sx={{ mb: 2 }}>
+      <Toolbar sx={{ gap: 1 }}>
+        <Button color="inherit" component={RouterLink} to="/">
+          home
+        </Button>
+        <Button color="inherit" component={RouterLink} to="/users">
+          users
+        </Button>
+        {user && (
+          <Button color="inherit" component={RouterLink} to="/create">
+            create blog
+          </Button>
+        )}
+        {!user && (
+          <Button color="inherit" component={RouterLink} to="/login">
+            login
+          </Button>
+        )}
+        <Box sx={{ flexGrow: 1 }} />
+        {user && (
+          <>
+            <Typography variant="body2" sx={{ mr: 1 }}>
+              {user.name || user.username} logged in
+            </Typography>
+            <Button color="inherit" variant="outlined" onClick={handleLogout}>
+              logout
+            </Button>
+          </>
+        )}
+      </Toolbar>
+    </AppBar>
+  )
+}
+
+export default Navigation
